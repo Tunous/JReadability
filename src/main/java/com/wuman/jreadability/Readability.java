@@ -56,10 +56,11 @@ public class Readability {
      * 4. Replace the current DOM tree with the new one. 
      * 5. Read peacefully.
      * 
+     * @param displayTitle
      * @param preserveUnlikelyCandidates
      */
     // @formatter:on
-    private void init(boolean preserveUnlikelyCandidates) {
+    private void init(boolean displayTitle, boolean preserveUnlikelyCandidates) {
         if (mDocument.body() != null && mBodyCache == null) {
             mBodyCache = mDocument.body().html();
         }
@@ -69,7 +70,7 @@ public class Readability {
         /* Build readability's DOM tree */
         Element overlay = mDocument.createElement("div");
         Element innerDiv = mDocument.createElement("div");
-        Element articleTitle = getArticleTitle();
+        Element articleTitle = displayTitle ? getArticleTitle() : null;
         Element articleContent = grabArticle(preserveUnlikelyCandidates);
 
         /**
@@ -82,7 +83,7 @@ public class Readability {
         if (isEmpty(getInnerText(articleContent, false))) {
             if (!preserveUnlikelyCandidates) {
                 mDocument.body().html(mBodyCache);
-                init(true);
+                init(displayTitle, true);
                 return;
             } else {
                 articleContent
@@ -91,7 +92,9 @@ public class Readability {
         }
 
         /* Glue the structure of our document together. */
-        innerDiv.appendChild(articleTitle);
+        if (displayTitle) {
+            innerDiv.appendChild(articleTitle);
+        }
         innerDiv.appendChild(articleContent);
         overlay.appendChild(innerDiv);
 
@@ -103,8 +106,8 @@ public class Readability {
     /**
      * Runs readability.
      */
-    public final void init() {
-        init(false);
+    public final void init(boolean displayTitle) {
+        init(displayTitle, false);
     }
 
     /**
